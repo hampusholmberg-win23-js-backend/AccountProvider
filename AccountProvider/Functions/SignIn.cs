@@ -82,11 +82,13 @@ namespace AccountProvider.Functions
                 {
                     Subject = new ClaimsIdentity(new Claim[]
                     {
-                            new(ClaimTypes.Email, user.Email!),
-                            new(ClaimTypes.Name, user.Email!),
+                        new(ClaimTypes.Email, user.Email!),
+                        new(ClaimTypes.Name, user.Email!),
                     }),
                     Expires = DateTime.Now.AddDays(2),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                    Issuer = "SiliconAccountProvider",
+                    Audience = "SiliconWebApplication"
                 };
 
                 var token = tokenHandler.CreateToken(tokenDescriptor);
