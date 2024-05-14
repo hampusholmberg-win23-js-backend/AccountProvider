@@ -45,7 +45,7 @@ namespace AccountProvider.Functions
                     {
                         //var result = await _singInManager.PasswordSignInAsync(usr!.Email, usr.Password, usr.IsPersistent, false);
 
-                        var result = await _singInManager.PasswordSignInAsync("hampusholmber@live.se", "Vetinte123!", false, false);
+                        var result = await _singInManager.PasswordSignInAsync(usr.Email, usr.Password, false, false);
 
                         if (result.Succeeded)
                         {
