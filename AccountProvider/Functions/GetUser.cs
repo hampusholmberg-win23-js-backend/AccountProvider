@@ -1,24 +1,48 @@
+using AccountProvider.RequestModels;
+using Data.Contexts;
+using Data.Entities;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace AccountProvider.Functions
 {
     public class GetUser
     {
         private readonly ILogger<GetUser> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public GetUser(ILogger<GetUser> logger)
+        public GetUser(ILogger<GetUser> logger, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
+            _userManager = userManager;
         }
 
         [Function("GetUser")]
-        public IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
-            return new OkObjectResult("Welcome to Azure Functions!");
+            var body = await new StreamReader(req.Body).ReadToEndAsync();
+
+            if (body != null)
+            {
+                var urr = JsonConvert.DeserializeObject<UserRetreivalRequest>(body);
+
+                if (urr != null)
+                {
+                    var userInformation = _userManager.Users.Include(x => x.UserProfile).FirstOrDefault(x => x.UserName == urr.Email);
+
+                    if (userInformation != null)
+                    {
+                        return new OkObjectResult(userInformation);
+                    }
+                    return new NotFoundResult();
+                }
+            }
+            return new BadRequestResult();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Data.Entities
 {
     public class UserProfileEntity
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public int Id { get; set; }
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string Email { get; set; } = null!;
@@ -14,6 +14,6 @@ namespace Data.Entities
         public string? ProfilePictureUrl { get; set; }
 
         public int? AddressId { get; set; }
-        public AddressEntity? Address { get; set; }
+        public virtual AddressEntity? Address { get; set; }
     }
 }
