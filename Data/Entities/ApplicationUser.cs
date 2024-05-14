@@ -6,7 +6,7 @@ namespace Data.Entities;
 public class ApplicationUser : IdentityUser
 {
     public bool IsAdmin { get; set; } = false;
-    public int UserProfileId { get; set; }
+    public string UserProfileId { get; set; } = null!;
     public virtual UserProfileEntity UserProfile { get; set; } = new UserProfileEntity();
 
 }

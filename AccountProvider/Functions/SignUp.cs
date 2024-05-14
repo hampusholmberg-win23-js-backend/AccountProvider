@@ -40,7 +40,8 @@ namespace AccountProvider.Functions
                         UserProfile = new UserProfileEntity
                         {
                             FirstName = urr.FirstName,
-                            LastName = urr.LastName
+                            LastName = urr.LastName,
+                            Email = urr.Email
                         }                        
                     };
 

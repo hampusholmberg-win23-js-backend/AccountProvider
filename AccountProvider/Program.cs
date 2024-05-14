@@ -19,6 +19,9 @@ var host = new HostBuilder()
         {
             x.User.RequireUniqueEmail = true;
             x.Password.RequiredLength = 8;
+            x.SignIn.RequireConfirmedEmail = false;
+            x.SignIn.RequireConfirmedAccount = false;
+            x.SignIn.RequireConfirmedPhoneNumber = false;
 
         }).AddEntityFrameworkStores<DataContext>();
 
