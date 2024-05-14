@@ -18,67 +18,83 @@ namespace AccountProvider.Functions
     {
         private readonly ILogger<SignIn> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _singInManager;
-        private readonly IConfiguration _configuration;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-
-        public SignIn(ILogger<SignIn> logger, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> singInManager, IConfiguration configuration)
+        public SignIn(ILogger<SignIn> logger, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> singInManager)
         {
             _logger = logger;
             _userManager = userManager;
-            _singInManager = singInManager;
-            _configuration = configuration;
+            _signInManager = singInManager;
         }
 
         [Function("SignIn")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
         {
-            var body = await new StreamReader(req.Body).ReadToEndAsync();
+            _logger.LogInformation("SignIn function triggered.");
 
-            if (body != null)
+            try
             {
-                var usr = JsonConvert.DeserializeObject<UserSignInRequest>(body);
+                var body = await new StreamReader(req.Body).ReadToEndAsync();
+                var signInRequest = JsonConvert.DeserializeObject<UserSignInRequest>(body);
 
-                if (usr != null && usr.Email != null && usr.Password != null) 
+                if (signInRequest != null && !string.IsNullOrEmpty(signInRequest.Email) && !string.IsNullOrEmpty(signInRequest.Password))
                 {
-                    try
+                    //var result = await _signInManager.PasswordSignInAsync(signInRequest.Email, signInRequest.Password, false, false);
+
+                    var user = await _userManager.FindByEmailAsync(signInRequest.Email);
+                    var result = await _signInManager.CheckPasswordSignInAsync(user, signInRequest.Password, false);
+
+                    if (result.Succeeded)
                     {
-                        //var result = await _singInManager.PasswordSignInAsync(usr!.Email, usr.Password, usr.IsPersistent, false);
+                        _logger.LogInformation("User signed in successfully.");
 
-                        var result = await _singInManager.PasswordSignInAsync(usr.Email, usr.Password, false, false);
-
-                        if (result.Succeeded)
-                        {
-                            var user = await _userManager.FindByEmailAsync(usr.Email);
-                            var token = GenerateJwtToken(user);
-
-                            return new OkObjectResult(token);
-                        }
+                        var token = GenerateJwtToken(user);
+                        return new OkObjectResult(token);
                     }
-                    catch (Exception ex) { return new BadRequestObjectResult(ex.Message); }
+                    else
+                    {
+                        _logger.LogError("Failed to sign in user.");
+                        return new UnauthorizedResult();
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Invalid sign-in request.");
+                    return new BadRequestResult();
                 }
             }
-            return new BadRequestResult();
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error occurred while processing sign-in request: {ex.Message}");
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
         }
 
         public string GenerateJwtToken(ApplicationUser user)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["_jwtSecret"]);
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+            if (user != null)
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Id), // Assuming user.Id is the unique identifier for the user
-                                                         // You can add more claims here as needed
-                }),
-                Expires = DateTime.UtcNow.AddDays(1), // Token expires in 7 days (adjust as needed)
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtSecret"));
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                            new(ClaimTypes.Email, user.Email!),
+                            new(ClaimTypes.Name, user.Email!),
+                    }),
+                    Expires = DateTime.Now.AddDays(2),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+
+                return tokenString;
+            }
+            return null!;
         }
     }
 }

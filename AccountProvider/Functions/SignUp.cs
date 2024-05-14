@@ -45,7 +45,7 @@ namespace AccountProvider.Functions
                         }                        
                     };
 
-                    var result = await _userManager.CreateAsync(user);
+                    var result = await _userManager.CreateAsync(user, urr.Password);
 
                     if (result.Succeeded)
                     {
