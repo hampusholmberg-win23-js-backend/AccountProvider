@@ -36,13 +36,9 @@ namespace AccountProvider.Functions
                     {
                         UserName = urr.Email,
                         Email = urr.Email,
-
-                        UserProfile = new UserProfileEntity
-                        {
-                            FirstName = urr.FirstName,
-                            LastName = urr.LastName,
-                            Email = urr.Email
-                        }                        
+                        FirstName = urr.FirstName,
+                        LastName = urr.LastName,
+                        
                     };
 
                     var result = await _userManager.CreateAsync(user, urr.Password);
@@ -50,6 +46,10 @@ namespace AccountProvider.Functions
                     if (result.Succeeded)
                     {
                         return new OkObjectResult(result);
+                    }
+                    else if (result.Errors.Any(x => x.Code == "DuplicateUserName"))
+                    {
+                        return new ConflictObjectResult(result);
                     }
                 }
             }

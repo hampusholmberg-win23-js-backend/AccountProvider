@@ -39,8 +39,6 @@ namespace AccountProvider.Functions
 
                 if (signInRequest != null && !string.IsNullOrEmpty(signInRequest.Email) && !string.IsNullOrEmpty(signInRequest.Password))
                 {
-                    //var result = await _signInManager.PasswordSignInAsync(signInRequest.Email, signInRequest.Password, false, false);
-
                     var user = await _userManager.FindByEmailAsync(signInRequest.Email);
                     var result = await _signInManager.CheckPasswordSignInAsync(user, signInRequest.Password, false);
 
@@ -75,7 +73,10 @@ namespace AccountProvider.Functions
             if (user != null)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtSecret"));
+                //var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtSecret"));
+
+
+                var key = Encoding.UTF8.GetBytes("JDJ5JDEwJGlnQmI5c2NsaldaSVNmWkpGaDJWNy5XV0lrdWRlV0plVXpOLklCTER5ZmFFOEp5VG5FTTJT");
 
 
                 var tokenDescriptor = new SecurityTokenDescriptor

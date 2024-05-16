@@ -34,8 +34,7 @@ namespace AccountProvider.Functions
                 if (urr != null)
                 {
                     var userInformation = _userManager.Users
-                        .Include(x => x.UserProfile)
-                        .Include(x => x.UserProfile.Address)
+                        .Include(x => x.Address)
                         .FirstOrDefault(x => x.UserName == urr.Email);
 
                     if (userInformation != null)
