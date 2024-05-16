@@ -1,48 +1,45 @@
 using AccountProvider.RequestModels;
-using Data.Contexts;
 using Data.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AccountProvider.Functions
 {
-    public class GetUser
+    public class DeleteUser
     {
-        private readonly ILogger<GetUser> _logger;
+        private readonly ILogger<DeleteUser> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public GetUser(ILogger<GetUser> logger, UserManager<ApplicationUser> userManager)
+        public DeleteUser(ILogger<DeleteUser> logger, UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _userManager = userManager;
         }
 
-        [Function("GetUser")]
+        [Function("DeleteUser")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
         {
             var body = await new StreamReader(req.Body).ReadToEndAsync();
+            var urr = JsonConvert.DeserializeObject<UserRemovalRequest>(body);
 
-            if (body != null)
+            if (urr != null)
             {
-                var urr = JsonConvert.DeserializeObject<UserRetreivalRequest>(body);
-
-                if (urr != null)
+                var userToDelete = _userManager.Users.FirstOrDefault(x => x.Id == urr.Id);
+                if (userToDelete != null)
                 {
-                    var userInformation = _userManager.Users
-                        .Include(x => x.Address)
-                        .FirstOrDefault(x => x.UserName == urr.Email);
+                    var result = await _userManager.DeleteAsync(userToDelete);
 
-                    if (userInformation != null)
+                    if (result.Succeeded)
                     {
-                        return new OkObjectResult(userInformation);
+                        return new OkResult();
                     }
-                    return new NotFoundResult();
+                    return new BadRequestResult();
                 }
+                return new NotFoundResult();
             }
             return new BadRequestResult();
         }
