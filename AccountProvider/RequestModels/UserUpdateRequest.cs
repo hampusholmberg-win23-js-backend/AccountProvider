@@ -11,6 +11,6 @@ public class UserUpdateRequest
     public string? PhoneNumber { get; set; }
     public string? Biography { get; set; }
     public string? ProfileImage { get; set; }
-    public int AddressId { get; set; }
+    public int? AddressId { get; set; }
     public AddressEntity? Address { get; set; }
 }
