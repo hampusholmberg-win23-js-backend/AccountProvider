@@ -50,7 +50,15 @@ namespace AccountProvider.Functions
                         x.PostalCode == uur.Address.PostalCode &&
                         x.City == uur.Address.City);
 
-                        user!.Address = addressExists ?? uur.Address;
+                        if (addressExists != null)
+                        {
+                            user!.Address = addressExists;
+                            user!.AddressId = addressExists.Id;
+                        }
+                        else
+                        {
+                            user!.Address = uur.Address;
+                        }
                     }
                     else
                     {
