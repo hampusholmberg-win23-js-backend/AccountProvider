@@ -2,6 +2,5 @@
 
 public class UserRetreivalRequest
 {
-    public string UserName { get; set; } = null!;
-    public string Email { get; set; } = null!;
+    public string Id { get; set; } = null!;
 }
