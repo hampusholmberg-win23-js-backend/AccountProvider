@@ -41,6 +41,7 @@ namespace AccountProvider.Functions
                     user.LastName = uur.LastName;
                     user.Biography = uur.Biography;
                     user.PhoneNumber = uur.PhoneNumber;
+                    user.NewsletterSubscriber = uur.NewsletterSubscriber;
 
                     if (uur.Address != null)
                     {
