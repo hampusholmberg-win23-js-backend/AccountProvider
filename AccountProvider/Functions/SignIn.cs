@@ -73,11 +73,7 @@ namespace AccountProvider.Functions
             if (user != null)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                //var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtSecret"));
-
-
-                var key = Encoding.UTF8.GetBytes("JDJ5JDEwJGlnQmI5c2NsaldaSVNmWkpGaDJWNy5XV0lrdWRlV0plVXpOLklCTER5ZmFFOEp5VG5FTTJT");
-
+                var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JwtSecret"));
 
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
